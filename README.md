@@ -1,4 +1,6 @@
-# ethstaking_prysm_pyrmont
+Staking Ethereum with Prysm
+===========================
+
 Update the Server
 
 Make sure the system is up to date with the latest software and security updates.
