@@ -15,4 +15,4 @@ wget https://raw.githubusercontent.com/Weibeler/ethstaking_prysm_pyrmont/main/fi
 
 Download Beacon Chain systemd file
 
-wbet https://raw.githubusercontent.com/Weibeler/ethstaking_prysm_pyrmont/main/prysm-beaconchain.service
+wget https://raw.githubusercontent.com/Weibeler/ethstaking_prysm_pyrmont/main/prysm-beaconchain.service
