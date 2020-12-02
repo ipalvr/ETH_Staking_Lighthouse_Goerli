@@ -9,3 +9,6 @@ sudo apt dist-upgrade && sudo apt autoremove
 
 sudo reboot
 
+Download firewall.sh
+
+wget https://raw.githubusercontent.com/Weibeler/ethstaking_prysm_pyrmont/main/firewall.sh
