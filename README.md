@@ -1,5 +1,5 @@
-Staking Ethereum with Prysm
-===========================
+Staking Ethereum with Lighthouse \ Ubuntu
+=========================================
 
 Update the Server
 -----------------
