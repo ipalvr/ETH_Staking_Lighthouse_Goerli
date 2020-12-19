@@ -1,9 +1,8 @@
 #!/bin/bash
 #Allow Go Ethereum
 sudo ufw allow 30303
-#Allow Prysm
-sudo ufw allow 13000/tcp
-sudo ufw allow 12000/udp
+#Allow Lighthouse
+sudo ufw allow 9000
 #Allow Grafana
 sudo ufw allow 3000/tcp
 #Allow Prometheus
