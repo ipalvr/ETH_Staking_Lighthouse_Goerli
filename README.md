@@ -158,7 +158,7 @@ ExecStart=geth --http --datadir /var/lib/goethereum --cache 2048 --maxpeers 30
 [Install]
 WantedBy=default.target
 ```
-wget link.
+Note:  Make sure you change to the /etc/systemd/system directory.
 
 wget https://raw.githubusercontent.com/ipalvr/ethstaking_prysm_pyrmont/main/geth.service
 
