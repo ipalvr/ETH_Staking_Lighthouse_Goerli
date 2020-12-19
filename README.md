@@ -141,8 +141,9 @@ Create a systemd service config file to configure the service.
 sudo nano /etc/systemd/system/geth.service
 ```
 
-Paste the following service configuration into the file.
+Paste the following service configuration into the file and save or download via wget from the link below.
 
+```
 [Unit]
 Description=Go Ethereum Client
 After=network.target
@@ -156,12 +157,16 @@ RestartSec=5
 ExecStart=geth --http --datadir /var/lib/goethereum --cache 2048 --maxpeers 30
 [Install]
 WantedBy=default.target
+```
+wget link.
+
+wget https://raw.githubusercontent.com/ipalvr/ethstaking_prysm_pyrmont/main/geth.service
 
 Notable flags:
 --http Expose an HTTP endpoint (http://localhost:8545) that the Lighthouse beacon chain will connect to.
 --cache Size of the internal cache in GB. Reduce or increase depending on your available system memory. A setting of 2048 results in roughly 4–5GB of memory usage.
 --maxpeers Maximum number of peers to connect with. More peers equals more internet data usage. Do not set this too low or your Eth1 node will struggle to stay in sync.
-Check the screen shot below for reference. Press CTRL+C then ‘y’ then <enter> to save and exit.
+
 
 
 
