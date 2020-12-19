@@ -1,14 +1,13 @@
 [Unit]
-Description=Prysm Beaconchain
-Wants=network-online.target
-After=network-online.target
+Description=Go Ethereum Client
+After=network.target
+Wants=network.target
 [Service]
+User=goeth
+Group=goeth
 Type=simple
-User=ubuntu
-Group=ubuntu
 Restart=always
 RestartSec=5
-Environment="ClientIP=$(curl -s v4.ident.me)"
-ExecStart=/bin/bash -c '/media/usb/prysm/prysm.sh beacon-chain --pyrmont --datadir=/media/usb/prysm/beaconchain --http-web3provider=https://eth-goerli.alchemyapi.io/v2/DyY0KSEap_-bfoByvSqF-v2vbUkp3Gvc --accept-terms-of-use'
+ExecStart=geth --http --datadir /var/lib/goethereum --cache 2048 --maxpeers 30
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
