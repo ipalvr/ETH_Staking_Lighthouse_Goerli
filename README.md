@@ -1,6 +1,15 @@
 Staking Ethereum with Lighthouse \ Ubuntu - Mainnet
 ===================================================
 
+Install Prerequisites
+---------------------
+
+Install Codecopy
+
+```
+https://github.com/zenorocha/codecopy#install
+```
+
 Update the Server
 -----------------
 
@@ -8,9 +17,14 @@ Make sure the system is up to date with the latest software and security updates
 
 ```
 sudo apt update && sudo apt upgrade
+```
+```
 sudo apt dist-upgrade && sudo apt autoremove
+```
+```
 sudo reboot
 ```
+
 Secure the Server
 -----------------
 
@@ -58,6 +72,8 @@ Explicitly apply the defaults. Inbound traffic denied, outbound traffic allowed.
 
 ```
 sudo ufw default deny incoming
+```
+```
 sudo ufw default allow outgoing
 ```
 
@@ -100,6 +116,8 @@ You should only be using a single keeping service. If you were using NTPD from a
 
 ```
 ntpq -p
+```
+```
 sudo apt-get remove ntp
 ```
 
@@ -113,7 +131,11 @@ Install the Go Ethereum client using PPA’s (Personal Package Archives).
 
 ```
 sudo add-apt-repository -y ppa:ethereum/ethereum
+```
+```
 sudo apt update
+```
+```
 sudo apt install geth
 ```
 
