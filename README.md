@@ -190,6 +190,101 @@ Notable flags:
 --cache Size of the internal cache in GB. Reduce or increase depending on your available system memory. A setting of 2048 results in roughly 4–5GB of memory usage.
 --maxpeers Maximum number of peers to connect with. More peers equals more internet data usage. Do not set this too low or your Eth1 node will struggle to stay in sync.
 
+Reload systemd to reflect the changes and start the service. Check status to make sure it’s running correctly.
+
+```
+sudo systemctl daemon-reload
+```
+
+```
+sudo systemctl start geth
+```
+
+```
+sudo systemctl status geth
+```
+
+It should say active (running) in green text. If not then go back and repeat the steps to fix the problem. Press Q to quit (will not affect the geth service).
+
+Enable the geth service to automatically start on reboot.
+
+```
+sudo systemctl enable geth
+```
+
+The Go Ethereum node will begin to sync. You can follow the progress or check for errors by running the following command. Press Ctrl+C to exit (will not affect the geth service).
+
+```
+sudo journalctl -fu geth.service
+```
+
+Check Sync Status - To check your Eth1 node sync status use the following command to access the console.
+
+```
+geth attach http://127.0.0.1:8545
+```
+> eth.syncing
+
+If false is returned then your sync is complete. If syncing data is returned then you are still syncing. For reference there are roughly 700–800 million knownStates.
+
+Download Lighthouse
+-------------------
+The Lighthouse client is a single binary which encapsulates the functionality of the beacon chain and validator. This step will download and prepare the Lighthouse binary.
+First, go to the link below and identify the latest release. It is at the top of the page. For example:
+
+https://github.com/sigp/lighthouse/releases
+
+Download the archive using the commands below. Modify the URL in the instructions below to match the download link for the latest version.
+
+```
+cd ~
+```
+
+```
+sudo apt install curl
+```
+
+```
+curl -LO https://github.com/sigp/lighthouse/releases/download/v1.0.2/lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
+```
+
+Extract the binary from the archive and copy to the /usr/local/bin directory. The Lighthouse service will run it from there. Modify the URL name as necessary.
+
+```
+tar xvf lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
+```
+
+```
+sudo cp lighthouse /usr/local/bin
+```
+
+Use the following commands to verify the binary works with your server CPU. If not, go back and download the portable version and redo the steps to here and try again.
+
+```
+cd /usr/local/bin/
+```
+
+```
+./lighthouse --version # <-- should display version information
+```
+
+NOTE: There has been at least one case where version information is displayed yet subsequent commands have failed. If you get a Illegal instruction (core dumped) error while running the account validator import command (next step), then you may need to use the portable version instead.
+Clean up the extracted files.
+
+```
+cd ~
+```
+```
+sudo rm lighthouse
+```
+```
+sudo rm lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
+```
+
+NOTE: It is necessary to follow a specific series of steps to update Lighthouse. See Appendix B — Updating Lighthouse for further information.
+
+Import the Validator Keys
+-------------------------
 
 
 
