@@ -6,9 +6,8 @@ Install Prerequisites
 
 Install Codecopy
 
-```
 https://github.com/zenorocha/codecopy#install
-```
+
 
 Update the Server
 -----------------
@@ -95,7 +94,9 @@ sudo ufw status numbered
 ```
 Note: Geth node Port 8545wget firewall.sh
 
+```
 wget https://raw.githubusercontent.com/ipalvr/ethstaking_prysm_pyrmont/main/firewall.sh
+```
 
 Configure Timekeeping
 ---------------------
