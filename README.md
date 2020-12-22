@@ -325,7 +325,7 @@ sudo chown -R <yourusername>:<yourusername> /var/lib/lighthouse
 
 Copy keys via scp.
 ```
-scp -P 8675 keystore-m_12381_3600_0_0_0-1606213525.json ethstaker@192.168.1.76:eth2deposit-cli/validator_keys
+scp -P 8675 keystore-m_xxxxxxxxx.json username@192.168.1.2:eth2deposit-cli/validator_keys
 ```
 
 Run the validator key import process. You will need to provide the directory where the generated keystore-m files are located. E.g. $HOME/eth2deposit-cli/validator_keys.
