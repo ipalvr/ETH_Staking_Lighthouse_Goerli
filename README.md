@@ -1,3 +1,25 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Staking Ethereum with Lighthouse \ Ubuntu - Mainnet](#staking-ethereum-with-lighthouse-%5C-ubuntu---mainnet)
+  - [Install Prerequisites](#install-prerequisites)
+  - [Update the Server](#update-the-server)
+  - [Secure the Server](#secure-the-server)
+  - [Configure Timekeeping](#configure-timekeeping)
+  - [Set up an Ethereum (Eth1) Node](#set-up-an-ethereum-eth1-node)
+  - [Download Lighthouse](#download-lighthouse)
+  - [Import the Validator Keys](#import-the-validator-keys)
+- [Configure the Beacon Node Service](#configure-the-beacon-node-service)
+  - [Create and Configure the Service](#create-and-configure-the-service)
+- [Configure the Validator Service](#configure-the-validator-service)
+  - [Set up the Validator Node Account and Directory](#set-up-the-validator-node-account-and-directory)
+  - [Create and Configure the Service](#create-and-configure-the-service-1)
+- [Updating Geth](#updating-geth)
+- [Updating Lighthouse](#updating-lighthouse)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 Staking Ethereum with Lighthouse \ Ubuntu - Mainnet
 ===================================================
 
@@ -239,11 +261,9 @@ Download the archive using the commands below. Modify the URL in the instruction
 ```
 cd ~
 ```
-
 ```
 sudo apt install curl
 ```
-
 ```
 curl -LO https://github.com/sigp/lighthouse/releases/download/v1.0.2/lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
 ```
@@ -253,7 +273,6 @@ Extract the binary from the archive and copy to the /usr/local/bin directory. Th
 ```
 tar xvf lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
 ```
-
 ```
 sudo cp lighthouse /usr/local/bin
 ```
@@ -263,7 +282,6 @@ Use the following commands to verify the binary works with your server CPU. If n
 ```
 cd /usr/local/bin/
 ```
-
 ```
 ./lighthouse --version # <-- should display version information
 ```
@@ -286,12 +304,339 @@ NOTE: It is necessary to follow a specific series of steps to update Lighthouse.
 Import the Validator Keys
 -------------------------
 
+Configure Lighthouse by importing the validator keys and creating the service and service configuration required to run it.
+
+Copy the Validator Keystore Files
+
+If you generated the validator keystore-m…json file(s) on a machine other than your Ubuntu server you will need to copy the file(s) over to your home directory. You can do this using a USB drive (if your server is local), or via secure FTP (SFTP).
+
+Place the files here: $HOME/eth2deposit-cli/validator_keys. Create the directories if necessary.
+
+Import Keystore Files into the Validator Wallet
+
+Create a directory to store the validator wallet data and give the current user permission to access it. The current user needs access because they will be performing the import. Change <yourusername> to the logged in username.
+
+```
+sudo mkdir -p /var/lib/lighthouse
+```
+```
+sudo chown -R <yourusername>:<yourusername> /var/lib/lighthouse
+```
+
+Copy keys via scp.
+```
+scp -P 8675 keystore-m_12381_3600_0_0_0-1606213525.json ethstaker@192.168.1.76:eth2deposit-cli/validator_keys
+```
+
+Run the validator key import process. You will need to provide the directory where the generated keystore-m files are located. E.g. $HOME/eth2deposit-cli/validator_keys.
+
+```
+cd /usr/local/bin
+```
+```
+lighthouse --network mainnet account validator import --directory $HOME/eth2deposit-cli/validator_keys --datadir /var/lib/lighthouse
+```
+
+You will be asked to provide the password for the validator keys. This is the password you set when you created the keys during Step 1.
+
+You will be asked to provide the password for each key, one-by-one. Be sure to correctly provide the password each time because the validator will be running as a service and it needs to persist the password(s) to a file to access the key(s).
+
+Note that the validator data is saved in the following location created during the keystore import process: /var/lib/lighthouse/validators.
+
+Restore default permissions to the lighthouse directory.
+
+```
+sudo chown -R root:root /var/lib/lighthouse
+```
+
+Configure the Beacon Node Service
+=================================
 
 
+In this step you will configure and run the Lighthouse beacon node as a service so if the system restarts the process will automatically start back up again.
 
+Set up the Beacon Node Account and Directory
 
+Create an account for the beacon node to run under. This type of account can’t log into the server.
 
+```
+sudo useradd --no-create-home --shell /bin/false lighthousebeacon
+```
+Create the data directory for the Lighthouse beacon node database and set permissions.
+```
+sudo mkdir -p /var/lib/lighthouse/beacon
+```
+```
+sudo chown -R lighthousebeacon:lighthousebeacon /var/lib/lighthouse/beacon
+```
+```
+sudo chmod 700 /var/lib/lighthouse/beacon
+```
+```
+ls -dl /var/lib/lighthouse/beacon
+```
 
-Download Beacon Chain systemd file
+Create and Configure the Service
+--------------------------------
 
-wget https://raw.githubusercontent.com/ipalvr/ethstaking_prysm_pyrmont/main/prysm-beaconchain.service
+Create a systemd service config file to configure the service.
+
+```
+sudo nano /etc/systemd/system/lighthousebeacon.service
+```
+Paste the following into the file.
+```
+[Unit]
+Description=Lighthouse Eth2 Client Beacon Node
+Wants=network-online.target
+After=network-online.target
+[Service]
+User=lighthousebeacon
+Group=lighthousebeacon
+Type=simple
+Restart=always
+RestartSec=5
+ExecStart=/usr/local/bin/lighthouse bn --network mainnet --datadir /var/lib/lighthouse --staking --eth1-endpoints http://127.0.0.1:8545,https://eth-mainnet.alchemyapi.io/v2/yourAPIkey,https://mainnet.infura.io/v3/yourAPIkey
+[Install]
+WantedBy=multi-user.target
+```
+
+Notable flags
+bn subcommand instructs the lighthouse binary to run a beacon node.
+--eth1-endpoints One or more comma-delimited server endpoints for web3 connection. If multiple endpoints are given the endpoints are used as fallback in the given order. Also enables the -- eth1 flag. E.g. --eth1-endpoints http://127.0.0.1:8545,https://yourinfuranode,https://your3rdpartynode.
+
+Reload systemd to reflect the changes and start the service.
+
+```
+sudo systemctl daemon-reload
+```
+Note: If you are running a local Eth1 node (see Step 6) you should wait until it fully syncs before starting the lighthousebeacon service. Check progress here: sudo journalctl -fu geth.service
+Start the service and check to make sure it’s running correctly.
+```
+sudo systemctl start lighthousebeacon
+```
+```
+sudo systemctl status lighthousebeacon
+```
+
+Enable the service to automatically start on reboot.
+```
+sudo systemctl enable lighthousebeacon
+```
+If the Eth2 chain is post-genesis the Lighthouse beacon chain will begin to sync. It may take several hours to fully sync. You can follow the progress or check for errors by running the journalctl command. Press CTRL+C to exit (will not affect the lighthousebeacon service).
+```
+sudo journalctl -fu lighthousebeacon.service
+```
+A truncated view of the log shows the following status information.
+
+[NOTE: A current issue is resulting in an incorrect error message.]
+
+INFO Waiting for genesis 
+
+wait_time: 5 days 5 hrs, peers: 50, service: slot_notifier
+
+Once the Eth2 mainnet starts up the beacon chain will automatically start processing. The output will give an indication of time to fully sync with the Eth1 node.
+
+Configure the Validator Service
+===============================
+
+In this step you will configure and run the Lighthouse validator node as a service so if the system restarts the process will automatically start back up again.
+
+Set up the Validator Node Account and Directory
+-----------------------------------------------
+
+Create an account for the validator node to run under. This type of account can’t log into the server.
+```
+sudo useradd --no-create-home --shell /bin/false lighthousevalidator
+```
+In the validator wallet creation process we created the following directory: /var/lib/lighthouse/validators. Set directory permissions so the lighthousevalidator account can modify that directory.
+```
+sudo chown -R lighthousevalidator:lighthousevalidator /var/lib/lighthouse/validators
+```
+```
+sudo chmod 700 /var/lib/lighthouse/validators
+```
+```
+ls -dl /var/lib/lighthouse/validators
+```
+
+Create and Configure the Service
+--------------------------------
+
+Create a systemd service file to store the service config.
+```
+sudo nano /etc/systemd/system/lighthousevalidator.service
+```
+
+Paste the following into the file.
+
+```
+[Unit]
+Description=Lighthouse Eth2 Client Validator Node
+Wants=network-online.target
+After=network-online.target
+#BindsTo=lighthousebeacon.service  Removed 11/30/2020 per Somer
+[Service]
+User=lighthousevalidator
+Group=lighthousevalidator
+Type=simple
+Restart=always
+RestartSec=5
+ExecStart=/usr/local/bin/lighthouse vc --network mainnet --datadir /var/lib/lighthouse --graffiti "Hello from ipalvr!"
+[Install]
+WantedBy=multi-user.target
+```
+
+Notable flags.
+BindsTo=lighthousebeacon.service will stop the validator service if the beacon service stops. The validator service cannot function without the beacon service.
+
+vc subcommand instructs the lighthouse binary to run a validator node.
+
+--graffiti "<yourgraffiti>" Replace with your own graffiti string. For security and privacy reasons avoid information that can uniquely identify you. E.g. --graffiti "Hello Eth2! From Dominator".
+
+Reload systemd to reflect the changes and start the service and check to make sure it’s running correctly.
+```
+sudo systemctl daemon-reload
+```
+```
+sudo systemctl start lighthousevalidator
+```
+```
+sudo systemctl status lighthousevalidator
+```
+
+Enable the service to automatically start on reboot.
+```
+sudo systemctl enable lighthousevalidator
+```
+
+You can follow the progress or check for errors by running the journalctl command. Press CTRL+C to exit (will not affect the lighthousevalidator service.)
+```
+sudo journalctl -fu lighthousevalidator.service
+```
+
+For post-genesis deposits it may take hours or even days to activate the validator account(s) once the beacon chain has started processing.
+Once the Eth2 mainnet starts up the beacon chain and validator will automatically start processing.
+
+Once the Eth2 mainnet starts up the beacon chain and validator will automatically start processing.
+
+Updating Geth
+=============
+
+If you need to update to the latest version of Geth follow these steps.
+```
+$ sudo systemctl stop lighthousevalidator
+```
+```
+$ sudo systemctl stop lighthousebeacon
+```
+```
+$ sudo systemctl stop geth
+```
+```
+$ sudo apt update && sudo apt upgrade
+```
+```
+$ sudo systemctl start geth
+```
+```
+$ sudo systemctl status geth # <-- Check for errors
+```
+```
+$ sudo journalctl -fu geth # <-- Monitor
+```
+```
+$ sudo systemctl start lighthousebeacon
+```
+```
+$ sudo systemctl status lighthousebeacon # <-- Check for errors
+```
+```
+$ sudo journalctl -fu lighthousebeacon # <-- Monitor
+```
+```
+$ sudo systemctl start lighthousevalidator
+```
+```
+$ sudo systemctl status lighthousevalidator # <-- Check for errors
+```
+```
+$ sudo journalctl -fu lighthousevalidator # <-- Monitor
+```
+
+Updating Lighthouse
+===================
+
+If you need to update to the latest version of Lighthouse follow these steps.
+
+First, go here and identify the latest Linux release. Modify the URL in the instructions below to match the download link for the latest version.
+
+NOTE: There are two types of binaries — portable and non-portable. The difference is explained here. Make sure you choose the correct type.
+```
+cd ~
+```
+```
+sudo apt install curl
+```
+```
+curl -LO https://github.com/sigp/lighthouse/releases/download/v1.0.3/
+```
+```
+lighthouse-v1.0.3-x86_64-unknown-linux-gnu.tar.gz
+```
+
+Stop the Lighthouse client services.
+```
+sudo systemctl stop lighthousevalidator
+```
+```
+sudo systemctl stop lighthousebeacon
+```
+
+Extract the binary from the archive and copy to the /usr/local/bin directory. Modify the URL name as necessary.
+```
+tar xvf lighthouse-v1.0.3-x86_64-unknown-linux-gnu.tar.gz
+```
+```
+sudo cp lighthouse /usr/local/bin
+```
+
+Check version
+```
+cd /usr/local/bin
+```
+```
+lighthouse -V
+```
+
+Restart the services and check for errors.
+```
+sudo systemctl start lighthousebeacon
+```
+```
+sudo systemctl status lighthousebeacon # <-- Check for errors
+```
+```
+sudo journalctl -fu lighthousebeacon # <-- Monitor
+```
+```
+sudo systemctl start lighthousevalidator
+```
+```
+sudo systemctl status lighthousevalidator # <-- Check for errors
+```
+```
+sudo journalctl -fu lighthousevalidator # <-- Monitor
+```
+
+Clean up the extracted files.
+```
+cd ~
+```
+```
+sudo rm lighthouse
+```
+```
+sudo rm lighthouse-v1.0.3-x86_64-unknown-linux-gnu.tar.gz
+```
+
