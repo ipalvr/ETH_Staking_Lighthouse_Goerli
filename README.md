@@ -579,10 +579,7 @@ cd ~
 sudo apt install curl
 ```
 ```
-curl -LO https://github.com/sigp/lighthouse/releases/download/v1.0.3/
-```
-```
-lighthouse-v1.0.3-x86_64-unknown-linux-gnu.tar.gz
+curl -LO https://github.com/sigp/lighthouse/releases/download/VERSION/lighthouse-VERSION-aarch64-unknown-linux-gnu.tar.gz
 ```
 
 Stop the Lighthouse client services.
