@@ -574,7 +574,7 @@ First, go here and identify the latest Linux release. Modify the URL in the inst
 NOTE: There are two types of binaries — portable and non-portable. The difference is explained in this link
 
 https://lighthouse-book.sigmaprime.io/installation-binaries.html
-
+```
 cd ~
 ```
 ```
