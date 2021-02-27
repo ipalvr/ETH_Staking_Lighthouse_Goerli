@@ -636,6 +636,6 @@ cd ~
 sudo rm lighthouse
 ```
 ```
-sudo rm lighthouse-v1.0.3-x86_64-unknown-linux-gnu.tar.gz
+sudo rm lighthouse-VERSION-ARCHITECTURE-unknown-linux-gnu.tar.gz
 ```
 
