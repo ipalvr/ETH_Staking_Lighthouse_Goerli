@@ -581,7 +581,7 @@ cd ~
 sudo apt install curl
 ```
 ```
-curl -LO https://github.com/sigp/lighthouse/releases/download/VERSION/lighthouse-VERSION-aarch64-unknown-linux-gnu.tar.gz
+curl -LO https://github.com/sigp/lighthouse/releases/download/VERSION/lighthouse-VERSION-ARCHITECTURE-unknown-linux-gnu.tar.gz
 ```
 
 Stop the Lighthouse client services.
@@ -594,7 +594,7 @@ sudo systemctl stop lighthousebeacon
 
 Extract the binary from the archive and copy to the /usr/local/bin directory. Modify the URL name as necessary.
 ```
-tar xvf lighthouse-v1.0.3-x86_64-unknown-linux-gnu.tar.gz
+tar xvf lighthouse-v1.0.3-ARCHITECTURE-unknown-linux-gnu.tar.gz
 ```
 ```
 sudo cp lighthouse /usr/local/bin
