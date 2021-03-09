@@ -571,8 +571,9 @@ If you need to update to the latest version of Lighthouse follow these steps.
 
 First, go here and identify the latest Linux release. Modify the URL in the instructions below to match the download link for the latest version.
 
-NOTE: There are two types of binaries — portable and non-portable. The difference is explained in this link
-
+NOTE: There are two types of binaries — portable and non-portable.  The -portable suffix which indicates if the portable feature is used:
+Without portable: uses modern CPU instructions to provide the fastest signature verification times (may cause Illegal instruction error on older CPUs)
+With portable: approx. 20% slower, but should work on all modern 64-bit processors.  More info here:
 https://lighthouse-book.sigmaprime.io/installation-binaries.html
 ```
 cd ~
