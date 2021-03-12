@@ -249,6 +249,19 @@ geth attach http://127.0.0.1:8545
 
 If false is returned then your sync is complete. If syncing data is returned then you are still syncing. For reference there are roughly 700–800 million knownStates.
 
+Here is another way to verify if geth is syncing.
+
+'''
+curl --request POST localhost:8545 \
+    --header 'Content-type: application/json' \
+    --data-raw '{
+    "jsonrpc":"2.0",
+    "method":"eth_syncing",
+    "params":[],
+    "id":1
+    }'
+ '''
+ 
 Download Lighthouse
 -------------------
 The Lighthouse client is a single binary which encapsulates the functionality of the beacon chain and validator. This step will download and prepare the Lighthouse binary.
