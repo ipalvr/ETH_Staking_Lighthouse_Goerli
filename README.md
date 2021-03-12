@@ -251,7 +251,7 @@ If false is returned then your sync is complete. If syncing data is returned the
 
 Here is another way to verify if geth is syncing.
 
-'''
+```
 curl --request POST localhost:8545 \
     --header 'Content-type: application/json' \
     --data-raw '{
@@ -260,7 +260,7 @@ curl --request POST localhost:8545 \
     "params":[],
     "id":1
     }'
- '''
+```
  
 Download Lighthouse
 -------------------
