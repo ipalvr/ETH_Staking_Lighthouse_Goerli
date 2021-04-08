@@ -538,43 +538,43 @@ Updating Geth
 
 If you need to update to the latest version of Geth follow these steps.
 ```
-$ sudo systemctl stop lighthousevalidator
+sudo systemctl stop lighthousevalidator
 ```
 ```
-$ sudo systemctl stop lighthousebeacon
+sudo systemctl stop lighthousebeacon
 ```
 ```
-$ sudo systemctl stop geth
+sudo systemctl stop geth
 ```
 ```
-$ sudo apt update && sudo apt upgrade
+sudo apt update && sudo apt upgrade
 ```
 ```
-$ sudo systemctl start geth
+sudo systemctl start geth
 ```
 ```
-$ sudo systemctl status geth # <-- Check for errors
+sudo systemctl status geth # <-- Check for errors
 ```
 ```
-$ sudo journalctl -fu geth # <-- Monitor
+sudo journalctl -fu geth # <-- Monitor
 ```
 ```
-$ sudo systemctl start lighthousebeacon
+sudo systemctl start lighthousebeacon
 ```
 ```
 $ sudo systemctl status lighthousebeacon # <-- Check for errors
 ```
 ```
-$ sudo journalctl -fu lighthousebeacon # <-- Monitor
+sudo journalctl -fu lighthousebeacon # <-- Monitor
 ```
 ```
-$ sudo systemctl start lighthousevalidator
+sudo systemctl start lighthousevalidator
 ```
 ```
-$ sudo systemctl status lighthousevalidator # <-- Check for errors
+sudo systemctl status lighthousevalidator # <-- Check for errors
 ```
 ```
-$ sudo journalctl -fu lighthousevalidator # <-- Monitor
+sudo journalctl -fu lighthousevalidator # <-- Monitor
 ```
 
 Updating Lighthouse
