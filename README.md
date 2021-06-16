@@ -631,17 +631,20 @@ Check for errors
 ```
 sudo systemctl status lighthousebeacon
 ```
+Monitor
 ```
-sudo journalctl -fu lighthousebeacon # <-- Monitor
+sudo journalctl -fu lighthousebeacon
 ```
 ```
 sudo systemctl start lighthousevalidator
 ```
+Check for errors
 ```
-sudo systemctl status lighthousevalidator # <-- Check for errors
+sudo systemctl status lighthousevalidator
 ```
+Monitor  
 ```
-sudo journalctl -fu lighthousevalidator # <-- Monitor
+sudo journalctl -fu lighthousevalidator
 ```
 
 Clean up the extracted files.
