@@ -623,7 +623,7 @@ cd /usr/local/bin
 lighthouse -V
 ```
 
-Restart the services and check for errors.
+Restart the services and check for errors
 ```
 sudo systemctl start lighthousebeacon
 ```
@@ -635,6 +635,7 @@ Monitor
 ```
 sudo journalctl -fu lighthousebeacon
 ```
+Restart the services and check for errors
 ```
 sudo systemctl start lighthousevalidator
 ```
