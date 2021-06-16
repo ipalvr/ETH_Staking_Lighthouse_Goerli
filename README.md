@@ -37,7 +37,7 @@ Update the Server
 Make sure the system is up to date with the latest software and security updates.
 
 ```
-sudo apt update && sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
 ```
 ```
 sudo apt dist-upgrade && sudo apt autoremove
@@ -627,8 +627,9 @@ Restart the services and check for errors.
 ```
 sudo systemctl start lighthousebeacon
 ```
+Check for errors
 ```
-sudo systemctl status lighthousebeacon # <-- Check for errors
+sudo systemctl status lighthousebeacon
 ```
 ```
 sudo journalctl -fu lighthousebeacon # <-- Monitor
