@@ -23,14 +23,6 @@
 Staking Ethereum with Lighthouse \ Ubuntu - Mainnet
 ===================================================
 
-Install Prerequisites
----------------------
-
-Install Codecopy
-
-https://github.com/zenorocha/codecopy#install
-
-
 Update the Server
 -----------------
 
@@ -52,29 +44,29 @@ Secure the Server
 Find your available port.
 
 ```
-sudo ss -tulpn | grep ':<yourSSHportnumber>'
+sudo ss -tulpn | grep ':<yourdesiredSSHportnumber>'
 ```
   
 Update the firewall to allow inbound traffic on <yourSSHportnumber>. SSH requires TCP.
 
 ```
-sudo ufw allow <yourSSHportnumber>/tcp
+sudo ufw allow <yourdesiredSSHportnumber>/tcp
 ```
   
 Next change the default SSH port.
 
 ```
-sudo nano /etc/ssh/sshd_config
+sudo vim /etc/ssh/sshd_config
 ```
 
-Find the line with # Port 22 or Port 22 and change it to Port <yourSSHportnumber>. Remove the # if it was present.
+Find the line with # Port 22 or Port 22 and change it to Port <yourdesiredSSHportnumber>. Remove the # if it was present and save the file.
 Restart the SSH service.
   
 ```  
 sudo systemctl restart ssh
 ```
 
-Next time you log in via SSH use <yourSSHportnumber> for the port.
+Next time you log in via SSH use <yourdesiredSSHportnumber> for the port.
 Optional: If you were already using UFW with port 22/TCP allowed then update the firewall to deny inbound traffic on that port. Only do this after you log in using the new SSH port.
 
 ```
@@ -98,7 +90,7 @@ sudo ufw default deny incoming
 sudo ufw default allow outgoing
 ```
 
-Create and run this script or download via wget.
+Create and run this script or download via wget.  (Need to revise)
 
 ```
 #!/bin/bash
@@ -114,10 +106,10 @@ sudo ufw allow 9090/tcp
 sudo ufw enable
 sudo ufw status numbered
 ```
-Note: Geth node Port 8545wget firewall.sh
+Note: Geth node Port 8545
 
 ```
-wget https://raw.githubusercontent.com/ipalvr/ethstaking_prysm_pyrmont/main/firewall.sh
+wget https://github.com/ipalvr/ETH_Staking_Lighthouse_Goerli/blob/e46fafcc6634945fb3544aa74ab0707255617424/firewall.sh
 ```
 
 Configure Timekeeping
@@ -278,23 +270,29 @@ cd ~
 sudo apt install curl
 ```
 ```
-curl -LO https://github.com/sigp/lighthouse/releases/download/v1.0.2/lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
+cd /media/usb
+```
+```
+sudo mkdir bin
+```
+```
+cd /media/usb/bin
+```
+```
+curl -LO https://github.com/sigp/lighthouse/releases/download/v2.5.1/lighthouse-v2.5.1-aarch64-unknown-linux-gnu.tar.gz
 ```
 
-Extract the binary from the archive and copy to the /usr/local/bin directory. The Lighthouse service will run it from there. Modify the URL name as necessary.
+Extract the binary from the archive.  The Lighthouse service will run it from there. Modify the URL name as necessary.
 
 ```
-tar xvf lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
+tar xvf lighthouse-v2.5.1-aarch64-unknown-linux-gnu.tar.gz
 ```
 ```
-sudo cp lighthouse /usr/local/bin
+rm lighthouse-v2.5.1-aarch64-unknown-linux-gnu.tar.gz
 ```
 
 Use the following commands to verify the binary works with your server CPU. If not, go back and download the portable version and redo the steps to here and try again.
 
-```
-cd /usr/local/bin/
-```
 ```
 ./lighthouse --version # <-- should display version information
 ```
@@ -302,19 +300,9 @@ cd /usr/local/bin/
 NOTE: There has been at least one case where version information is displayed yet subsequent commands have failed. If you get a Illegal instruction (core dumped) error while running the account validator import command (next step), then you may need to use the portable version instead.
 Clean up the extracted files.
 
-```
-cd ~
-```
-```
-sudo rm lighthouse
-```
-```
-sudo rm lighthouse-v1.0.2-x86_64-unknown-linux-gnu.tar.gz
-```
-
 NOTE: It is necessary to follow a specific series of steps to update Lighthouse. See Appendix B — Updating Lighthouse for further information.
 
-Import the Validator Keys
+Import the Validator Keys (left off here 8/8/22)
 -------------------------
 
 Configure Lighthouse by importing the validator keys and creating the service and service configuration required to run it.
