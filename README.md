@@ -294,7 +294,7 @@ rm lighthouse-v2.5.1-aarch64-unknown-linux-gnu.tar.gz
 Use the following commands to verify the binary works with your server CPU. If not, go back and download the portable version and redo the steps to here and try again.
 
 ```
-./lighthouse --version # <-- should display version information
+./lighthouse --version 
 ```
 
 NOTE: There has been at least one case where version information is displayed yet subsequent commands have failed. If you get a Illegal instruction (core dumped) error while running the account validator import command (next step), then you may need to use the portable version instead.
@@ -302,7 +302,7 @@ Clean up the extracted files.
 
 NOTE: It is necessary to follow a specific series of steps to update Lighthouse. See Appendix B — Updating Lighthouse for further information.
 
-Import the Validator Keys (left off here 8/8/22)
+Import the Validator Keys
 -------------------------
 
 Configure Lighthouse by importing the validator keys and creating the service and service configuration required to run it.
@@ -311,31 +311,31 @@ Copy the Validator Keystore Files
 
 If you generated the validator keystore-m…json file(s) on a machine other than your Ubuntu server you will need to copy the file(s) over to your home directory. You can do this using a USB drive (if your server is local), or via secure FTP (SFTP).
 
-Place the files here: $HOME/eth2deposit-cli/validator_keys. Create the directories if necessary.
+Place the files here: $HOME/eth2deposit-cli/validator_keys  Create the directories if necessary.
 
 Import Keystore Files into the Validator Wallet
 
 Create a directory to store the validator wallet data and give the current user permission to access it. The current user needs access because they will be performing the import. Change <yourusername> to the logged in username.
 
 ```
-sudo mkdir -p /var/lib/lighthouse
+sudo mkdir -p /media/usb/lighthouse
 ```
-```
-sudo chown -R <yourusername>:<yourusername> /var/lib/lighthouse
+```cd /mdei
+sudo chown -R <yourusername>:<yourusername> /media/usb/lighthouse
 ```
 
 Copy keys via scp.
 ```
-scp -P 8675 keystore-m_xxxxxxxxx.json username@192.168.1.2:eth2deposit-cli/validator_keys
+scp -P <YourPort> keystore-m_xxxxxxxxx.json username@x.x.x.x:eth2deposit-cli/validator_keys
 ```
 
 Run the validator key import process. You will need to provide the directory where the generated keystore-m files are located. E.g. $HOME/eth2deposit-cli/validator_keys.
 
 ```
-cd /usr/local/bin
+cd /media/usb/bin
 ```
 ```
-lighthouse --network mainnet account validator import --directory $HOME/eth2deposit-cli/validator_keys --datadir /var/lib/lighthouse
+./lighthouse --network goerli account validator import --directory ~/eth2deposit-cli/validator_keys --datadir /media/usb/lighthouse
 ```
 
 You will be asked to provide the password for the validator keys. This is the password you set when you created the keys during Step 1.
@@ -344,15 +344,95 @@ You will be asked to provide the password for each key, one-by-one. Be sure to c
 
 Note that the validator data is saved in the following location created during the keystore import process: /var/lib/lighthouse/validators.
 
-Restore default permissions to the lighthouse directory.
+Restore default permissions to the lighthouse directory. (Recieved Operation not permitted Aug 21, 2022)
 
 ```
-sudo chown -R root:root /var/lib/lighthouse
+sudo chown -R root:root /media/usb/lighthouse
 ```
+
+Configure Swap Space
+====================
+
+A swap space (a file on the disk used to store in-memory data when the system memory gets low) is used to guard against out-of-memory errors. It is particularly useful for clients that require large amounts of memory when syncing or running.
+
+```
+free -h
+```
+
+Zeros on the Swap: row indicate there is no swap space assigned
+
+Recommended Swap Space
+
+RAM     Swap Size
+  8GB           3GB
+ 12GB           3GB
+ 16GB           4GB
+ 24GB           5GB
+ 32GB           6GB
+ 64GB           8GB
+128GB          11GB
+
+Check for Space
+
+```
+df -h
+```
+
+Create the swap space.
+
+```
+sudo fallocate -l 3G /swapfile
+```
+```
+sudo chmod 600 /swapfile
+```
+```
+sudo mkswap /swapfile
+```
+```
+sudo swapon /swapfile
+```
+
+Verify the changes.
+
+```
+free -h
+```
+
+Enable the swap space to persist after reboot.
+
+```
+sudo cp /etc/fstab /etc/fstab.bak
+```
+```
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+Configure the swap space.
+
+```
+sudo sysctl vm.swappiness=10
+```
+```
+sudo sysctl vm.vfs_cache_pressure=50
+```
+
+Open the config file to configure the swap space.
+
+```
+sudo vim /etc/sysctl.conf
+```
+
+Add the following to the end of the file.
+
+```
+vm.swappiness=10
+vm.vfs_cache_pressure = 50
+```
+The swap file is now configured. Monitor using the htop command.
 
 Configure the Beacon Node Service
 =================================
-
 
 In this step you will configure and run the Lighthouse beacon node as a service so if the system restarts the process will automatically start back up again.
 
@@ -365,10 +445,10 @@ sudo useradd --no-create-home --shell /bin/false lighthousebeacon
 ```
 Create the data directory for the Lighthouse beacon node database and set permissions.
 ```
-sudo mkdir -p /var/lib/lighthouse/beacon
+sudo mkdir -p /media/usb/lighthouse/beacon
 ```
 ```
-sudo chown -R lighthousebeacon:lighthousebeacon /var/lib/lighthouse/beacon
+sudo chown -R lighthousebeacon:lighthousebeacon /media/usb/lighthouse/beacon
 ```
 ```
 sudo chmod 700 /var/lib/lighthouse/beacon
