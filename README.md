@@ -136,124 +136,55 @@ ntpq -p
 sudo apt-get remove ntp
 ```
 
-Set up an Ethereum (Eth1) Node
+Mount USB
 ------------------------------
 
-An Ethereum node is required for staking. You can either run a local Eth1 node or use a third party node. This guide will provide instructions for running Go Ethereum. If you would rather use a third party option then skip this step.
-
-Install Go Ethereum
-Install the Go Ethereum client using PPA’s (Personal Package Archives).
-
+Add the Universe Repository
 ```
-sudo add-apt-repository -y ppa:ethereum/ethereum
+sudo add-apt-repository universe
+```
+Check the filesystem name
+```
+lsblk -f
+```
+Install exfat utilities
+```
+sudo apt-get install exfat-fuse exfat-utils
+```
+Make a mount point
+```
+sudo mkdir /media/usb
+```
+Mounts and grant access to the 1000 user, in this case ubuntu
+```
+sudo mount -o uid=1000,gid=1000 /dev/sda1 /media/usb
+```
+Get UUID to permanently mount drive
+```
+sudo blkid
+```
+Edit fstab
+```
+sudo vim /etc/fstab
 ```
 ```
-sudo apt update
-```
-```
-sudo apt install geth
-```
-
-Go Ethereum will be configured to run as a background service. Create an account for the service to run under. This type of account can’t log into the server.
-
-```
-sudo useradd --no-create-home --shell /bin/false goeth
-```
-
-Create the data directory for the Eth1 chain. This is required for storing the Eth1 node data.
-
-```
-sudo mkdir -p /var/lib/goethereum
-```
-
-Set directory permissions. The goeth account needs permission to modify the data directory.
-
-```
-sudo chown -R goeth:goeth /var/lib/goethereum
-```
-
-Create a systemd service config file to configure the service.
-
-```
-sudo nano /etc/systemd/system/geth.service
+UUID=6307-9516 /media/usb auto uid=1000,gid=1000,umask=022,nosuid,nodev,nofail,x-gvfs-show 0 0
 ```
 
-Paste the following service configuration into the file and save or download via wget from the link below.
+At the bottom of that file, add an entry that contains the UUID:
 
-```
-[Unit]
-Description=Go Ethereum Client
-After=network.target
-Wants=network.target
-[Service]
-User=goeth
-Group=goeth
-Type=simple
-Restart=always
-RestartSec=5
-ExecStart=geth --http --datadir /var/lib/goethereum --cache 2048 --maxpeers 30
-[Install]
-WantedBy=default.target
-```
-Note:  Make sure you change to the /etc/systemd/system directory.
+Details:
+UUID=CEE8-AC73 - is the UUID of the drive. You don't have to use the UUID here. You could just use /dev/sdj, but it's always safer to use the UUID as that will never change (whereas the device name could).
+/data - is the mount point for the device.
+auto - automatically mounts the partition at boot 
+nosuid - specifies that the filesystem cannot contain set userid files. This prevents root escalation and other security issues.
+nodev - specifies that the filesystem cannot contain special devices (to prevent access to random device hardware).
+nofail - removes the errorcheck.
+x-gvfs-show - show the mount option in the file manager. If this is on a GUI-less server, this option won't be necessary.
+0 - determines which filesystems need to be dumped (0 is the default).
+0 - determine the order in which filesystem checks are done at boot time (0 is the default).
 
-wget https://raw.githubusercontent.com/ipalvr/ethstaking_prysm_pyrmont/main/geth.service
 
-Notable flags:
---http Expose an HTTP endpoint (http://localhost:8545) that the Lighthouse beacon chain will connect to.
---cache Size of the internal cache in GB. Reduce or increase depending on your available system memory. A setting of 2048 results in roughly 4–5GB of memory usage.
---maxpeers Maximum number of peers to connect with. More peers equals more internet data usage. Do not set this too low or your Eth1 node will struggle to stay in sync.
-
-Reload systemd to reflect the changes and start the service. Check status to make sure it’s running correctly.
-
-```
-sudo systemctl daemon-reload
-```
-
-```
-sudo systemctl start geth
-```
-
-```
-sudo systemctl status geth
-```
-
-It should say active (running) in green text. If not then go back and repeat the steps to fix the problem. Press Q to quit (will not affect the geth service).
-
-Enable the geth service to automatically start on reboot.
-
-```
-sudo systemctl enable geth
-```
-
-The Go Ethereum node will begin to sync. You can follow the progress or check for errors by running the following command. Press Ctrl+C to exit (will not affect the geth service).
-
-```
-sudo journalctl -fu geth.service
-```
-
-Check Sync Status - To check your Eth1 node sync status use the following command to access the console.
-
-```
-geth attach http://127.0.0.1:8545
-```
-> eth.syncing
-
-If false is returned then your sync is complete. If syncing data is returned then you are still syncing. For reference there are roughly 700–800 million knownStates.
-
-Here is another way to verify if geth is syncing.
-
-```
-curl --request POST localhost:8545 \
-    --header 'Content-type: application/json' \
-    --data-raw '{
-    "jsonrpc":"2.0",
-    "method":"eth_syncing",
-    "params":[],
-    "id":1
-    }'
-```
- 
 Download Lighthouse
 -------------------
 The Lighthouse client is a single binary which encapsulates the functionality of the beacon chain and validator. This step will download and prepare the Lighthouse binary.
