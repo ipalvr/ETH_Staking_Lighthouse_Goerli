@@ -204,13 +204,10 @@ sudo apt install curl
 cd /media/usb
 ```
 ```
-sudo mkdir bin
+mkdir bin && cd bin
 ```
 ```
-cd /media/usb/bin
-```
-```
-curl -LO https://github.com/sigp/lighthouse/releases/download/v2.5.1/lighthouse-v2.5.1-aarch64-unknown-linux-gnu.tar.gz
+curl -LO https://github.com/sigp/lighthouse/releases/download/v3.0.0/lighthouse-v3.0.0-aarch64-unknown-linux-gnu.tar.gz
 ```
 
 Extract the binary from the archive.  The Lighthouse service will run it from there. Modify the URL name as necessary.
@@ -251,11 +248,13 @@ Create a directory to store the validator wallet data and give the current user 
 ```
 sudo mkdir -p /media/usb/lighthouse
 ```
-```cd /mdei
+```
+cd  /media/usb/lighthouse
+```
 sudo chown -R <yourusername>:<yourusername> /media/usb/lighthouse
 ```
 
-Copy keys via scp.
+Copy key(s) via scp - keystore-m_xxxxx_xxxx_x_x_x-xxxxxxxxxxx.json
 ```
 scp -P <YourPort> keystore-m_xxxxxxxxx.json username@x.x.x.x:eth2deposit-cli/validator_keys
 ```
@@ -275,7 +274,7 @@ You will be asked to provide the password for each key, one-by-one. Be sure to c
 
 Note that the validator data is saved in the following location created during the keystore import process: /var/lib/lighthouse/validators.
 
-Restore default permissions to the lighthouse directory. (Recieved Operation not permitted Aug 21, 2022)
+Restore default permissions to the lighthouse directory. (Will return Operation Not Permitted because of filesystem on USB drive.  Not to worry for Goerli.)
 
 ```
 sudo chown -R root:root /media/usb/lighthouse
