@@ -342,6 +342,26 @@ Restore default permissions to the lighthouse directory.
 ```
 sudo chown -R root:root /ssd/lighthouse
 ```
+
+Generate Client Authentication Secret
+=====================================
+On the server, communication between the Execution and Consensus clients is securedusing a
+JSON Web Token (JWT) authentication scheme. The JWT is represented by a file that contains a randomly generated 32-byte hex string. The Execution and Consensus clients each make use of the file for message authentication. More information here.  https://github.com/ethereum/execution-apis/blob/main/src/engine/authentication.md
+
+Make a directory for the JWT
+```
+sudo mkdir /var/lib/jwtsecret
+
+Generate the JWT file using the openssl cryptography software library.
+```
+openssl rand -hex 32 | sudo tee /var/lib/jwtsecret/jwt.hex > /dev/null
+```
+Use the following command to inspect the file with the hex string.
+```
+sudo vim /var/lib/jwtsecret/jwt.hex
+```
+Copy or create the file on your Execution Client
+
 Configure the Beacon Node Service
 =================================
 
@@ -378,7 +398,7 @@ sudo vim /etc/systemd/system/lighthousebeacon.service
 Paste the following into the file.
 ```
 [Unit]
-Description=Lighthouse Eth2 Client Beacon Node
+Description=Lighthouse Consensus Client BN (Goerli Test Network)
 Wants=network-online.target
 After=network-online.target
 [Service]
@@ -387,14 +407,23 @@ Group=lighthousebeacon
 Type=simple
 Restart=always
 RestartSec=5
-ExecStart=/usr/local/bin/lighthouse bn --network mainnet --datadir /var/lib/lighthouse --staking --eth1-endpoints http://127.0.0.1:8545,https://eth-mainnet.alchemyapi.io/v2/yourAPIkey,https://mainnet.infura.io/v3/yourAPIkey
+ExecStart=/usr/local/bin/lighthouse bn \
+--network goerli \
+--datadir /ssd/lighthouse \
+--http \
+--execution-endpoint http://<IP of Execution Node>:8551 \
+--execution-jwt /var/lib/jwtsecret/jwt.hex \
+--checkpoint-sync-url https://goerli.checkpoint-sync.ethdevops.io \
+--metrics
 [Install]
 WantedBy=multi-user.target
 ```
 
-Notable flags
-bn subcommand instructs the lighthouse binary to run a beacon node.
---eth1-endpoints One or more comma-delimited server endpoints for web3 connection. If multiple endpoints are given the endpoints are used as fallback in the given order. Also enables the -- eth1 flag. E.g. --eth1-endpoints http://127.0.0.1:8545,https://yourinfuranode,https://your3rdpartynode.
+Notable flags:
+bn - subcommand instructs the lighthouse binary to run as a beacon node.
+--http - Exposes an http endpoint which is used by the validator client to connect to thebeacon node.
+--execution-endpoint=http://127.0.0.1:8551 - The address of the Execution Client. Shouldbe the same for all Execution Clients detailed in this guide.
+--execution-jwt /var/lib/jwtsecret/jwt.hex - The path to the JWT file that is required forauthenticated communication between the Execution and Consensus clients.
 
 Reload systemd to reflect the changes and start the service.
 
@@ -416,7 +445,7 @@ sudo systemctl enable lighthousebeacon
 ```
 If the Eth2 chain is post-genesis the Lighthouse beacon chain will begin to sync. It may take several hours to fully sync. You can follow the progress or check for errors by running the journalctl command. Press CTRL+C to exit (will not affect the lighthousebeacon service).
 ```
-sudo journalctl -fu lighthousebeacon.service
+sudo journalctl -fu lighthousebeacon
 ```
 A truncated view of the log shows the following status information.
 
