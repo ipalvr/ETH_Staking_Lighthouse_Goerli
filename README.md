@@ -20,23 +20,121 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Staking Ethereum with Lighthouse \ Ubuntu - Mainnet
+Staking Ethereum with Lighthouse \ Ubuntu - Goerli
 ===================================================
 
-Update the Server
------------------
+Mount USB
+------------------------------
 
-Make sure the system is up to date with the latest software and security updates.
+Add the Universe Repository
+```
+sudo add-apt-repository universe
+```
+Install exfat utilities
+```
+sudo apt-get install exfat-fuse exfat-utils
+```
+Make a mount point
+```
+sudo mkdir -p ssd
+```
+Check the filesystem name and get UUID to permanently mount drive
+```
+lsblk -f
+```
+Format drive
+```
+sudo mkfs -t ext4 /dev/sda1
+```
+Edit fstab
+```
+sudo vim /etc/fstab
+```
+Add at the end of the line, separated by a tab
+```
+<UUID> /ssd	ext4	defaults	0	2
+```
+Configure Swap Space
+====================
+
+A swap space (a file on the disk used to store in-memory data when the system memory gets low) is used to guard against out-of-memory errors. It is particularly useful for clients that require large amounts of memory when syncing or running.
 
 ```
-sudo apt update && sudo apt upgrade -y
+free -h
+```
+
+Zeros on the Swap: row indicate there is no swap space assigned
+
+Recommended Swap Space
+
+RAM     Swap Size
+  8GB           3GB
+ 12GB           3GB
+ 16GB           4GB
+ 24GB           5GB
+ 32GB           6GB
+ 64GB           8GB
+128GB          11GB
+
+Check for Space
+
+```
+df -h
+```
+
+Create the swap space.
+
+```
+sudo fallocate -l 3G /swapfile
 ```
 ```
-sudo apt dist-upgrade && sudo apt autoremove
+sudo chmod 600 /swapfile
 ```
 ```
-sudo reboot
+sudo mkswap /swapfile
 ```
+```
+sudo swapon /swapfile
+```
+
+Verify the changes.
+
+```
+free -h
+```
+
+Enable the swap space to persist after reboot.
+
+```
+sudo cp /etc/fstab /etc/fstab.bak
+```
+```
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+Configure the swap space.
+
+```
+sudo sysctl vm.swappiness=10
+```
+```
+sudo sysctl vm.vfs_cache_pressure=50
+```
+
+Open the config file to configure the swap space.
+
+```
+sudo vim /etc/sysctl.conf
+```
+
+Add the following to the end of the file.
+
+```
+vm.swappiness=10
+vm.vfs_cache_pressure = 50
+```
+The swap file is now configured. Monitor using the htop command.
+
 
 Secure the Server
 -----------------
@@ -135,47 +233,19 @@ ntpq -p
 ```
 sudo apt-get remove ntp
 ```
+Update the Server
+-----------------
 
-Mount USB
-------------------------------
-
-Add the Universe Repository
-```
-sudo add-apt-repository universe
-```
-Check the filesystem name
-```
-lsblk -f
-```
-Install exfat utilities
-```
-sudo apt-get install exfat-fuse exfat-utils
-```
-```
-sudo mkfs -t ext4 /dev/sda1
-```
-Make a mount point
-```
-sudo mkdir -p ssd
-```
-```
+Make sure the system is up to date with the latest software and security updates.
 
 ```
-Grants access to the ubuntu user
+sudo apt update && sudo apt upgrade -y
 ```
-
 ```
-Get UUID to permanently mount drive
+sudo apt dist-upgrade && sudo apt autoremove
 ```
-sudo blkid
 ```
-Edit fstab
-```
-sudo vim /etc/fstab
-```
-Add at the end of the line
-```
-<UUID> /ssd  ext4 rw,noatime,nofail,user,auto    0  2
+sudo reboot
 ```
 
 Download Lighthouse
@@ -272,88 +342,6 @@ Restore default permissions to the lighthouse directory.
 ```
 sudo chown -R root:root /ssd/lighthouse
 ```
-
-Configure Swap Space
-====================
-
-A swap space (a file on the disk used to store in-memory data when the system memory gets low) is used to guard against out-of-memory errors. It is particularly useful for clients that require large amounts of memory when syncing or running.
-
-```
-free -h
-```
-
-Zeros on the Swap: row indicate there is no swap space assigned
-
-Recommended Swap Space
-
-RAM     Swap Size
-  8GB           3GB
- 12GB           3GB
- 16GB           4GB
- 24GB           5GB
- 32GB           6GB
- 64GB           8GB
-128GB          11GB
-
-Check for Space
-
-```
-df -h
-```
-
-Create the swap space.
-
-```
-sudo fallocate -l 3G /swapfile
-```
-```
-sudo chmod 600 /swapfile
-```
-```
-sudo mkswap /swapfile
-```
-```
-sudo swapon /swapfile
-```
-
-Verify the changes.
-
-```
-free -h
-```
-
-Enable the swap space to persist after reboot.
-
-```
-sudo cp /etc/fstab /etc/fstab.bak
-```
-```
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-```
-
-Configure the swap space.
-
-```
-sudo sysctl vm.swappiness=10
-```
-```
-sudo sysctl vm.vfs_cache_pressure=50
-```
-
-Open the config file to configure the swap space.
-
-```
-sudo vim /etc/sysctl.conf
-```
-
-Add the following to the end of the file.
-
-```
-vm.swappiness=10
-vm.vfs_cache_pressure = 50
-```
-The swap file is now configured. Monitor using the htop command.
-
 Configure the Beacon Node Service
 =================================
 
@@ -362,22 +350,21 @@ In this step you will configure and run the Lighthouse beacon node as a service 
 Set up the Beacon Node Account and Directory
 
 Create an account for the beacon node to run under. This type of account can’t log into the server.
-
 ```
 sudo useradd --no-create-home --shell /bin/false lighthousebeacon
 ```
 Create the data directory for the Lighthouse beacon node database and set permissions.
 ```
-sudo mkdir -p /media/usb/lighthouse/beacon
+sudo mkdir -p /ssd/lighthouse/beacon
 ```
 ```
-sudo chown -R lighthousebeacon:lighthousebeacon /media/usb/lighthouse/beacon
+sudo chown -R lighthousebeacon:lighthousebeacon /ssd/lighthouse/beacon
 ```
 ```
-sudo chmod 700 /var/lib/lighthouse/beacon
+sudo chmod 700 /ssd/lighthouse/beacon
 ```
 ```
-ls -dl /var/lib/lighthouse/beacon
+ls -dl /ssd/lighthouse/beacon
 ```
 
 Create and Configure the Service
@@ -386,7 +373,7 @@ Create and Configure the Service
 Create a systemd service config file to configure the service.
 
 ```
-sudo nano /etc/systemd/system/lighthousebeacon.service
+sudo vim /etc/systemd/system/lighthousebeacon.service
 ```
 Paste the following into the file.
 ```
