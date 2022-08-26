@@ -151,13 +151,19 @@ Install exfat utilities
 ```
 sudo apt-get install exfat-fuse exfat-utils
 ```
+```
+sudo mkfs -t ext4 /dev/sda1
+```
 Make a mount point
 ```
-sudo mkdir /media/usb
+sudo mkdir -p ssd
 ```
-Mounts and grant access to the 1000 user, in this case ubuntu
 ```
-sudo mount -o uid=1000,gid=1000 /dev/sda1 /media/usb
+
+```
+Grants access to the ubuntu user
+```
+
 ```
 Get UUID to permanently mount drive
 ```
@@ -167,23 +173,10 @@ Edit fstab
 ```
 sudo vim /etc/fstab
 ```
+Add at the end of the line
 ```
-UUID=6307-9516 /media/usb auto uid=1000,gid=1000,umask=022,nosuid,nodev,nofail,x-gvfs-show 0 0
+<UUID> /ssd  ext4 rw,noatime,nofail,user,auto    0  2
 ```
-
-At the bottom of that file, add an entry that contains the UUID:
-
-Details:
-UUID=CEE8-AC73 - is the UUID of the drive. You don't have to use the UUID here. You could just use /dev/sdj, but it's always safer to use the UUID as that will never change (whereas the device name could).
-/data - is the mount point for the device.
-auto - automatically mounts the partition at boot 
-nosuid - specifies that the filesystem cannot contain set userid files. This prevents root escalation and other security issues.
-nodev - specifies that the filesystem cannot contain special devices (to prevent access to random device hardware).
-nofail - removes the errorcheck.
-x-gvfs-show - show the mount option in the file manager. If this is on a GUI-less server, this option won't be necessary.
-0 - determines which filesystems need to be dumped (0 is the default).
-0 - determine the order in which filesystem checks are done at boot time (0 is the default).
-
 
 Download Lighthouse
 -------------------
@@ -201,28 +194,28 @@ cd ~
 sudo apt install curl
 ```
 ```
-cd /media/usb
+cd /ssd
 ```
 ```
-mkdir bin && cd bin
+sudo mkdir bin && cd bin
 ```
 ```
-curl -LO https://github.com/sigp/lighthouse/releases/download/v3.0.0/lighthouse-v3.0.0-aarch64-unknown-linux-gnu.tar.gz
+sudo curl -LO https://github.com/sigp/lighthouse/releases/download/v3.0.0/lighthouse-v3.0.0-aarch64-unknown-linux-gnu.tar.gz
 ```
 
 Extract the binary from the archive.  The Lighthouse service will run it from there. Modify the URL name as necessary.
 
 ```
-tar xvf lighthouse-v2.5.1-aarch64-unknown-linux-gnu.tar.gz
+sudo tar xvf lighthouse-v3.0.0-aarch64-unknown-linux-gnu.tar.gz
 ```
 ```
-rm lighthouse-v2.5.1-aarch64-unknown-linux-gnu.tar.gz
+rm lighthouse-v3.0.0-aarch64-unknown-linux-gnu.tar.gz
 ```
 
 Use the following commands to verify the binary works with your server CPU. If not, go back and download the portable version and redo the steps to here and try again.
 
 ```
-./lighthouse --version 
+sudo ./lighthouse --version 
 ```
 
 NOTE: There has been at least one case where version information is displayed yet subsequent commands have failed. If you get a Illegal instruction (core dumped) error while running the account validator import command (next step), then you may need to use the portable version instead.
@@ -246,12 +239,12 @@ Import Keystore Files into the Validator Wallet
 Create a directory to store the validator wallet data and give the current user permission to access it. The current user needs access because they will be performing the import. Change <yourusername> to the logged in username.
 
 ```
-sudo mkdir -p /media/usb/lighthouse
+sudo mkdir -p /ssd/lighthouse
 ```
 ```
-cd  /media/usb/lighthouse
+cd  /ssd/lighthouse
 ```
-sudo chown -R <yourusername>:<yourusername> /media/usb/lighthouse
+sudo chown -R <yourusername>:<yourusername> /ssd/lighthouse
 ```
 
 Copy key(s) via scp - keystore-m_xxxxx_xxxx_x_x_x-xxxxxxxxxxx.json
@@ -262,10 +255,10 @@ scp -P <YourPort> keystore-m_xxxxxxxxx.json username@x.x.x.x:eth2deposit-cli/val
 Run the validator key import process. You will need to provide the directory where the generated keystore-m files are located. E.g. $HOME/eth2deposit-cli/validator_keys.
 
 ```
-cd /media/usb/bin
+cd /ssd/bin
 ```
 ```
-./lighthouse --network goerli account validator import --directory ~/eth2deposit-cli/validator_keys --datadir /media/usb/lighthouse
+./lighthouse --network goerli account validator import --directory ~/eth2deposit-cli/validator_keys --datadir /ssd/lighthouse
 ```
 
 You will be asked to provide the password for the validator keys. This is the password you set when you created the keys during Step 1.
@@ -274,10 +267,10 @@ You will be asked to provide the password for each key, one-by-one. Be sure to c
 
 Note that the validator data is saved in the following location created during the keystore import process: /var/lib/lighthouse/validators.
 
-Restore default permissions to the lighthouse directory. (Will return Operation Not Permitted because of filesystem on USB drive.  Not to worry for Goerli.)
+Restore default permissions to the lighthouse directory.
 
 ```
-sudo chown -R root:root /media/usb/lighthouse
+sudo chown -R root:root /ssd/lighthouse
 ```
 
 Configure Swap Space
